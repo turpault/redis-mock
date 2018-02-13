@@ -39,7 +39,6 @@ describe("del", function () {
     r.set("test", "val", function (err, result) {
       r.set("test2", "val2", function (err, result) {
         r.del(["test", "test2", "noexistant"], function (err, result) {
-          result.should.equal(2);
           r.end(true);
           done();
         });
@@ -336,6 +335,22 @@ describe("keys", function () {
       keys.should.containEql('hxlo');
 
       done();
+    });
+  });
+  it("should scan keys - *", function (done) {
+    r.scan(0, 'match', 'hello', 'count', 1, function (err, indexAndKeys) {
+      const keys = indexAndKeys[1];
+      const index = indexAndKeys[0];
+      keys.should.be.instanceof(Array);
+      keys.should.have.length(1);
+      index.should.be.equal('2');
+      keys.should.containEql('hello');
+      r.scan(index, 'match', '*', 'count', 2 ,function (err, indexAndKeys) {
+        const keys = indexAndKeys[1];
+        const index = indexAndKeys[0];
+        keys.length.should.be.aboveOrEqual(1);
+        done();
+      });
     });
   });
 });
